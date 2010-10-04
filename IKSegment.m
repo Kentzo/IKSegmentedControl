@@ -12,13 +12,14 @@
 @synthesize contentView;
 @synthesize width;
 
-- (void)setContentView:(UIView *)newContentView {
+- (void)setContentView:(id)newContentView {
+    NSParameterAssert([newContentView isKindOfClass:[UIView class]]);
     [contentView removeFromSuperview];
     [self addSubview:newContentView];
     contentView = newContentView;
-    contentView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    contentView.backgroundColor = [UIColor clearColor];
-    contentView.opaque = NO;
+    [contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+    [contentView setBackgroundColor:[UIColor clearColor]];
+    [contentView setOpaque:NO];
 }
 
 
