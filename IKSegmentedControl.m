@@ -67,6 +67,10 @@ static const NSUInteger _SelectedState = 1;
 - (void)dealloc {
     [font release];
     [segments release];
+    [_backgrounds[_NormalState] release];
+    [_backgrounds[_SelectedState] release];
+    [_separators[_NormalState] release];
+    [_separators[_SelectedState] release];
     [super dealloc];
 }
 
@@ -100,10 +104,10 @@ static const NSUInteger _SelectedState = 1;
         origin.x += frame.size.width;
         segment.frame = frame;
         if (index == selectedSegmentIndex) {
-            segment.backgroundColor = _background[_SelectedState];
+            segment.backgroundColor = _backgrounds[_SelectedState];
         }
         else {
-            segment.backgroundColor = _background[_NormalState];
+            segment.backgroundColor = _backgrounds[_NormalState];
         }
         ++index;
     }
@@ -173,13 +177,40 @@ static const NSUInteger _SelectedState = 1;
 }
 
 
-- (void)setColorForStateNormal:(UIColor *)normalColor forStateSelected:(UIColor *)selectedColor {
-    [_background[_NormalState] release];
-    _background[_NormalState] = [normalColor retain];
-    [_background[_SelectedState] release];
-    _background[_SelectedState] = [selectedColor retain];
+- (void)setColorForNormalState:(UIColor *)normalColor forSelectedState:(UIColor *)selectedColor {
+    [_backgrounds[_NormalState] release];
+    _backgrounds[_NormalState] = [normalColor retain];
+    [_backgrounds[_SelectedState] release];
+    _backgrounds[_SelectedState] = [selectedColor retain];
 }
 
+
+- (UIColor *)normalStateColor {
+    return _backgrounds[_NormalState];
+}
+
+
+- (UIColor *)selectedStateColor {
+    return _backgrounds[_SelectedState];
+}
+
+
+- (void)setSeparatorForNormalState:(UIColor *)normalSeparator forSelectedState:(UIColor *)selectedSeparator {
+    [_separators[_NormalState] release];
+    _separators[_NormalState] = [normalSeparator retain];
+    [_separators[_SelectedState] release];
+    _separators[_SelectedState] = [selectedSeparator retain];
+}
+
+
+- (UIColor *)normalStateSeparator {
+    return _separators[_NormalState];
+}
+
+
+- (UIColor *)selectedStateSeparator {
+    return _separators[_SelectedState];
+}
 
 //- (void)setImageForStateNormal:(UIImage *)normalImage forStateSelected:(UIImage *)selectedImage {
 //    [_background[_NormalState] release];

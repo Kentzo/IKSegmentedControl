@@ -20,7 +20,8 @@ typedef enum _IKSegmentedControlStyle {
     NSInteger selectedSegmentIndex;
     NSMutableArray *segments;
 @private
-    id _background[2];
+    id _backgrounds[2];
+    id _separators[2];
 }
 
 @property (nonatomic, retain) UIFont *font;
@@ -41,7 +42,12 @@ typedef enum _IKSegmentedControlStyle {
 - (UIImage *)imageForSegmentAtIndex:(NSUInteger)segment; // contentView of IKSegment must respond to 'image' selector
 
 // Supports only UIControlStateNormal and UIControlStateSelected
-- (void)setColorForStateNormal:(UIColor *)normalColor forStateSelected:(UIColor *)selectedColor;
-//- (void)setImageForStateNormal:(UIImage *)normalImage forStateSelected:(UIImage *)selectedImage;
+- (void)setColorForNormalState:(UIColor *)normalColor forSelectedState:(UIColor *)selectedColor;
+- (UIColor *)normalStateColor;
+- (UIColor *)selectedStateColor;
+
+- (void)setSeparatorForNormalState:(UIColor *)normalSeparator forSelectedState:(UIColor *)selectedSeparator;
+- (UIColor *)normalStateSeparator;
+- (UIColor *)selectedStateSeparator;
 
 @end
