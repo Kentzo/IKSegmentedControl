@@ -7,11 +7,11 @@
 
 
 @interface IKSegment : UIView {
-    UIView *contentView;
+    id contentView;
     CGFloat width;
 }
 
-@property (nonatomic, retain) UIView *contentView;
+@property (nonatomic, retain) id contentView;
 @property (nonatomic) CGFloat width;
 
 @end

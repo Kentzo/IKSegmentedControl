@@ -9,29 +9,59 @@
 #import "IKSegment.h"
 
 
+@interface IKSegmentedControl (/* Private Stuff Here */)
+
+- (void)_updateSegments;
+
+@end
+
+
 static const NSUInteger _NormalState = 0;
 static const NSUInteger _SelectedState = 1;
 
 @implementation IKSegmentedControl
-@synthesize font;
-@synthesize style;
 @synthesize selectedSegmentIndex;
-@synthesize numberOfSegments;
 @synthesize segments;
+@synthesize separatorColor;
+
++ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
+    BOOL automatic = NO;
+    
+    if (![key isEqualToString:@"selectedSegmentIndex"]) {
+        automatic = [super automaticallyNotifiesObserversForKey:key];
+    }
+    return automatic;
+}
+
+
+- (void)setSelectedSegmentIndex:(NSInteger)newSelectedSegmentIndex {
+    if (newSelectedSegmentIndex != selectedSegmentIndex) {
+        [self willChangeValueForKey:@"selectedSegmentIndex"];
+        selectedSegmentIndex = newSelectedSegmentIndex;
+        [self _updateSegments];
+        [self didChangeValueForKey:@"selectedSegmentIndex"];
+    }
+}
+
+
+- (void)setSeparatorColor:(UIColor *)newSeparatorColor {
+    [newSeparatorColor retain];
+    [separatorColor release];
+    separatorColor = newSeparatorColor;
+    [self _updateSegments];
+}
+
 
 - (id)initWithItems:(NSArray *)items {
-    if (![items count]) {
-        [self dealloc];
-        return nil;
-    }
+    NSParameterAssert([items count]);
+    
     if (self = [super initWithFrame:CGRectZero]) {
-        self.font = [UIFont systemFontOfSize:14.0f];
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
         self.clipsToBounds = YES;
         self.layer.cornerRadius = 10.0f;
-        numberOfSegments = [items count];
         segments = [[NSMutableArray alloc] initWithCapacity:[items count]];
+        
         for (id item in items) {
             IKSegment *segment = nil;
             if ([item isKindOfClass:[UIView class]]) {
@@ -65,12 +95,10 @@ static const NSUInteger _SelectedState = 1;
 
 
 - (void)dealloc {
-    [font release];
     [segments release];
+    [separatorColor release];
     [_backgrounds[_NormalState] release];
     [_backgrounds[_SelectedState] release];
-    [_separators[_NormalState] release];
-    [_separators[_SelectedState] release];
     [super dealloc];
 }
 
@@ -78,20 +106,30 @@ static const NSUInteger _SelectedState = 1;
 - (void)layoutSubviews {
     [super layoutSubviews];
     CGSize boundsSize = self.bounds.size;
-    CGFloat maxSegmentWidth = boundsSize.width/[segments count];
+    NSArray *customWidths = [[segments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"width != 0.0"]] valueForKey:@"width"];
+    CGFloat maxSegmentWidth = boundsSize.width;
+    for (NSNumber *width in customWidths) {
+        maxSegmentWidth -= [width floatValue];
+    }
+    maxSegmentWidth /= [segments count] - [customWidths count];
+    maxSegmentWidth = floor(maxSegmentWidth);
     
     // Calculate segments widths
     CGFloat totalWidth = 0.0f;
     for (IKSegment *segment in segments) {
-        [segment sizeToFit];
-        CGRect frame = segment.frame;
-        frame.size.width = MIN(maxSegmentWidth, frame.size.width);
+        CGRect frame = CGRectZero;
+        if (segment.width == 0.0f) {
+            frame.size.width = maxSegmentWidth;
+        }
+        else {
+            frame.size.width = segment.width;
+        }
         totalWidth += frame.size.width;
         segment.frame = frame;
     }
     
-    NSUInteger autoWidthsCount = [[segments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"width == 0.0"]] count];
-    CGFloat addWidth = floor((boundsSize.width - totalWidth)/autoWidthsCount);
+    // Calculate frames
+    CGFloat addWidth = boundsSize.width - totalWidth;
     CGPoint origin = CGPointZero;
     NSUInteger index = 0;
     for (IKSegment *segment in segments) {
@@ -133,7 +171,7 @@ static const NSUInteger _SelectedState = 1;
         if (index != selectedSegmentIndex) {
             selectedSegmentIndex = index;
             [self sendActionsForControlEvents:UIControlEventValueChanged];
-            [self setNeedsLayout];
+            [self _updateSegments];
         }
         return YES;
     }
@@ -195,28 +233,25 @@ static const NSUInteger _SelectedState = 1;
 }
 
 
-- (void)setSeparatorForNormalState:(UIColor *)normalSeparator forSelectedState:(UIColor *)selectedSeparator {
-    [_separators[_NormalState] release];
-    _separators[_NormalState] = [normalSeparator retain];
-    [_separators[_SelectedState] release];
-    _separators[_SelectedState] = [selectedSeparator retain];
-}
-
-
-- (UIColor *)normalStateSeparator {
-    return _separators[_NormalState];
-}
-
-
-- (UIColor *)selectedStateSeparator {
-    return _separators[_SelectedState];
-}
-
 //- (void)setImageForStateNormal:(UIImage *)normalImage forStateSelected:(UIImage *)selectedImage {
 //    [_background[_NormalState] release];
 //    _background[_NormalState] = [normalImage retain];
 //    [_background[_SelectedState] release];
 //    _background[_SelectedState] = [selectedImage retain];
 //}
+
+
+- (void)_updateSegments {
+    NSUInteger index = 0;
+    for (IKSegment *segment in segments) {
+        if (index == selectedSegmentIndex) {
+            segment.backgroundColor = _backgrounds[_SelectedState];
+        }
+        else {
+            segment.backgroundColor = _backgrounds[_NormalState];
+        }
+        ++index;
+    }
+}
 
 @end
