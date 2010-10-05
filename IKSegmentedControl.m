@@ -133,7 +133,7 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
         maxSegmentWidth -= [width floatValue];
     }
     maxSegmentWidth /= [segments count] - [customWidths count];
-    maxSegmentWidth = floor(maxSegmentWidth);
+    maxSegmentWidth = ceil(maxSegmentWidth);
     
     // Calculate segments frames
     CGPoint origin = CGPointZero;
