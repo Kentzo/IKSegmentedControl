@@ -11,6 +11,8 @@
 @implementation IKSegment
 @synthesize contentView;
 @synthesize width;
+@synthesize backgroundImage;
+@synthesize segmentPosition;
 
 - (void)setContentView:(id)newContentView {
     NSParameterAssert([newContentView isKindOfClass:[UIView class]]);
@@ -23,6 +25,14 @@
 }
 
 
+- (void)setBackgroundImage:(UIImage *)newBackgroundImage {
+    [newBackgroundImage retain];
+    [backgroundImage release];
+    backgroundImage = newBackgroundImage;
+    [self setNeedsDisplay];
+}
+
+
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         self.userInteractionEnabled = NO;
@@ -32,7 +42,24 @@
 
 
 - (void)dealloc {
+    [backgroundImage release];
     [super dealloc];
+}
+
+
+- (void)drawRect:(CGRect)rect {
+    if (backgroundImage) {
+        rect = self.bounds;
+        switch (segmentPosition) {
+            case IKSegmentPositionLeft:
+                rect.origin.x -= backgroundImage.leftCapWidth;
+                rect.size.width += backgroundImage.leftCapWidth;
+                break;
+            case IKSegmentPositionRight:
+                rect.size.width += backgroundImage.size.width - (backgroundImage.leftCapWidth + 1);
+        }
+        [backgroundImage drawInRect:rect];
+    }
 }
 
 
