@@ -7,6 +7,7 @@
 
 #import "IKSegmentedControl.h"
 #import "IKSegment.h"
+#import "IKSeparators.h"
 
 
 @interface IKSegmentedControl (/* Private Stuff Here */)
@@ -22,7 +23,20 @@ static const NSUInteger _SelectedState = 1;
 @implementation IKSegmentedControl
 @synthesize selectedSegmentIndex;
 @synthesize segments;
-@synthesize separatorColor;
+@dynamic separator;
+@synthesize separateSelectedItem;
+
+static void SetSegmentBackground(IKSegment *segment, id background) {
+    if ([background isKindOfClass:[UIColor class]]) {
+        segment.backgroundColor = background;
+        segment.backgroundImage = nil;
+    }
+    else {
+        segment.backgroundColor = [UIColor clearColor];
+        segment.backgroundImage = background;
+    }
+}
+
 
 + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
     BOOL automatic = NO;
@@ -39,21 +53,25 @@ static const NSUInteger _SelectedState = 1;
         [self willChangeValueForKey:@"selectedSegmentIndex"];
         selectedSegmentIndex = newSelectedSegmentIndex;
         [self _updateSegments];
+        [_separators setNeedsDisplay];
         [self didChangeValueForKey:@"selectedSegmentIndex"];
+        [self sendActionsForControlEvents:UIControlEventValueChanged];
     }
 }
 
 
-- (void)setSeparatorColor:(UIColor *)newSeparatorColor {
-    [newSeparatorColor retain];
-    [separatorColor release];
-    separatorColor = newSeparatorColor;
-    [self _updateSegments];
+- (void)setSeparator:(id)newSeparator {
+    _separators.separator = newSeparator;
+}
+
+
+- (id)separator {
+    return _separators.separator;
 }
 
 
 - (id)initWithItems:(NSArray *)items {
-    NSParameterAssert([items count]);
+    NSParameterAssert([items count] > 1);
     
     if (self = [super initWithFrame:CGRectZero]) {
         self.backgroundColor = [UIColor clearColor];
@@ -89,6 +107,10 @@ static const NSUInteger _SelectedState = 1;
             [self addSubview:segment];
             [segment release];
         }
+        
+        _separators = [[IKSeparators alloc] initWithSegmentedControl:self];
+        [self addSubview:_separators];
+        [_separators release];
     }
     return self;
 }
@@ -96,7 +118,6 @@ static const NSUInteger _SelectedState = 1;
 
 - (void)dealloc {
     [segments release];
-    [separatorColor release];
     [_backgrounds[_NormalState] release];
     [_backgrounds[_SelectedState] release];
     [super dealloc];
@@ -114,46 +135,31 @@ static const NSUInteger _SelectedState = 1;
     maxSegmentWidth /= [segments count] - [customWidths count];
     maxSegmentWidth = floor(maxSegmentWidth);
     
-    // Calculate segments widths
-    CGFloat totalWidth = 0.0f;
+    // Calculate segments frames
+    CGPoint origin = CGPointZero;
+    NSUInteger index = 0;
     for (IKSegment *segment in segments) {
-        CGRect frame = CGRectZero;
+        CGRect frame = segment.frame;
         if (segment.width == 0.0f) {
             frame.size.width = maxSegmentWidth;
         }
         else {
             frame.size.width = segment.width;
         }
-        totalWidth += frame.size.width;
-        segment.frame = frame;
-    }
-    
-    // Calculate frames
-    CGFloat addWidth = boundsSize.width - totalWidth;
-    CGPoint origin = CGPointZero;
-    NSUInteger index = 0;
-    for (IKSegment *segment in segments) {
-        CGRect frame = segment.frame;
-        if (segment.width == 0.0f) {
-            frame.size.width += addWidth;
-        }
         frame.size.height = boundsSize.height;
         frame.origin = origin;
         origin.x += frame.size.width;
         segment.frame = frame;
         if (index == selectedSegmentIndex) {
-            segment.backgroundColor = _backgrounds[_SelectedState];
+            SetSegmentBackground(segment, _backgrounds[_SelectedState]);
         }
         else {
-            segment.backgroundColor = _backgrounds[_NormalState];
+            SetSegmentBackground(segment, _backgrounds[_NormalState]);
         }
         ++index;
     }
-}
-
-
-- (void)drawRect:(CGRect)rect {
-
+    [[segments objectAtIndex:0] setSegmentPosition:IKSegmentPositionLeft];
+    [[segments lastObject] setSegmentPosition:IKSegmentPositionRight];
 }
 
 
@@ -168,11 +174,7 @@ static const NSUInteger _SelectedState = 1;
             ++index;
         }
         NSAssert(index < [segments count], @"IKSegmentedControl must have IKSegment for each point inside it");
-        if (index != selectedSegmentIndex) {
-            selectedSegmentIndex = index;
-            [self sendActionsForControlEvents:UIControlEventValueChanged];
-            [self _updateSegments];
-        }
+        self.selectedSegmentIndex = index;
         return YES;
     }
     else {
@@ -215,43 +217,40 @@ static const NSUInteger _SelectedState = 1;
 }
 
 
-- (void)setColorForNormalState:(UIColor *)normalColor forSelectedState:(UIColor *)selectedColor {
+- (void)setBackgroundForNormalState:(id)normalBackground forSelectedState:(id)selectedBackground {
+    NSParameterAssert([normalBackground isKindOfClass:[UIColor class]] || [normalBackground isKindOfClass:[UIImage class]]);
     [_backgrounds[_NormalState] release];
-    _backgrounds[_NormalState] = [normalColor retain];
+    _backgrounds[_NormalState] = [normalBackground retain];
+    
+    NSParameterAssert([selectedBackground isKindOfClass:[UIColor class]] || [selectedBackground isKindOfClass:[UIImage class]]);
     [_backgrounds[_SelectedState] release];
-    _backgrounds[_SelectedState] = [selectedColor retain];
+    _backgrounds[_SelectedState] = [selectedBackground retain];
+    [self _updateSegments];
 }
 
 
-- (UIColor *)normalStateColor {
+- (id)normalStateBackground {
     return _backgrounds[_NormalState];
 }
 
 
-- (UIColor *)selectedStateColor {
+- (id)selectedStateBackground {
     return _backgrounds[_SelectedState];
 }
-
-
-//- (void)setImageForStateNormal:(UIImage *)normalImage forStateSelected:(UIImage *)selectedImage {
-//    [_background[_NormalState] release];
-//    _background[_NormalState] = [normalImage retain];
-//    [_background[_SelectedState] release];
-//    _background[_SelectedState] = [selectedImage retain];
-//}
 
 
 - (void)_updateSegments {
     NSUInteger index = 0;
     for (IKSegment *segment in segments) {
         if (index == selectedSegmentIndex) {
-            segment.backgroundColor = _backgrounds[_SelectedState];
+            SetSegmentBackground(segment, _backgrounds[_SelectedState]);
         }
         else {
-            segment.backgroundColor = _backgrounds[_NormalState];
+            SetSegmentBackground(segment, _backgrounds[_NormalState]);
         }
         ++index;
     }
 }
+
 
 @end
