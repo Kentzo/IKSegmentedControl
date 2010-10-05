@@ -40,6 +40,7 @@ static const NSUInteger _SelectedState = 1;
         selectedSegmentIndex = newSelectedSegmentIndex;
         [self _updateSegments];
         [self didChangeValueForKey:@"selectedSegmentIndex"];
+        [self sendActionsForControlEvents:UIControlEventValueChanged];
     }
 }
 
@@ -114,28 +115,16 @@ static const NSUInteger _SelectedState = 1;
     maxSegmentWidth /= [segments count] - [customWidths count];
     maxSegmentWidth = floor(maxSegmentWidth);
     
-    // Calculate segments widths
-    CGFloat totalWidth = 0.0f;
-    for (IKSegment *segment in segments) {
-        CGRect frame = CGRectZero;
-        if (segment.width == 0.0f) {
-            frame.size.width = maxSegmentWidth;
-        }
-        else {
-            frame.size.width = segment.width;
-        }
-        totalWidth += frame.size.width;
-        segment.frame = frame;
-    }
-    
-    // Calculate frames
-    CGFloat addWidth = boundsSize.width - totalWidth;
+    // Calculate segments frames
     CGPoint origin = CGPointZero;
     NSUInteger index = 0;
     for (IKSegment *segment in segments) {
         CGRect frame = segment.frame;
         if (segment.width == 0.0f) {
-            frame.size.width += addWidth;
+            frame.size.width = maxSegmentWidth;
+        }
+        else {
+            frame.size.width = segment.width;
         }
         frame.size.height = boundsSize.height;
         frame.origin = origin;
@@ -168,11 +157,7 @@ static const NSUInteger _SelectedState = 1;
             ++index;
         }
         NSAssert(index < [segments count], @"IKSegmentedControl must have IKSegment for each point inside it");
-        if (index != selectedSegmentIndex) {
-            selectedSegmentIndex = index;
-            [self sendActionsForControlEvents:UIControlEventValueChanged];
-            [self _updateSegments];
-        }
+        self.selectedSegmentIndex index;
         return YES;
     }
     else {
@@ -231,14 +216,6 @@ static const NSUInteger _SelectedState = 1;
 - (UIColor *)selectedStateColor {
     return _backgrounds[_SelectedState];
 }
-
-
-//- (void)setImageForStateNormal:(UIImage *)normalImage forStateSelected:(UIImage *)selectedImage {
-//    [_background[_NormalState] release];
-//    _background[_NormalState] = [normalImage retain];
-//    [_background[_SelectedState] release];
-//    _background[_SelectedState] = [selectedImage retain];
-//}
 
 
 - (void)_updateSegments {

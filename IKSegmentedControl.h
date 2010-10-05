@@ -26,7 +26,6 @@
 - (void)setWidth:(CGFloat)width forSegmentAtIndex:(NSUInteger)segment; // 0.0 width indicates that IKSegmentedControl should calc width itself. Otherwise width will be used
 - (CGFloat)widthForSegmentAtIndex:(NSUInteger)segment;
 
-// Supports only UIControlStateNormal and UIControlStateSelected
 - (void)setColorForNormalState:(UIColor *)normalColor forSelectedState:(UIColor *)selectedColor;
 - (UIColor *)normalStateColor;
 - (UIColor *)selectedStateColor;
