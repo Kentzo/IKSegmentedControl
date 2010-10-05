@@ -169,7 +169,7 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
         CGPoint point = [touch locationInView:self];
         NSUInteger index = 0;
         for (IKSegment *segment in segments) {
-            if (CGRectContainsPoint(segment.frame, point))
+            if (CGRectContainsPoint(CGRectInset(segment.frame, -1.0f, -1.0f), point))
                 break;
             ++index;
         }
