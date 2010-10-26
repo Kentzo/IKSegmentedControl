@@ -57,6 +57,9 @@
                 break;
             case IKSegmentPositionRight:
                 rect.size.width += backgroundImage.size.width - (backgroundImage.leftCapWidth + 1);
+                break;
+            default:
+                break;
         }
         [backgroundImage drawInRect:rect];
     }
