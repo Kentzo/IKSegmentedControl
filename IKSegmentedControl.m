@@ -169,12 +169,12 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
         CGPoint point = [touch locationInView:self];
         NSUInteger index = 0;
         for (IKSegment *segment in segments) {
-            if (CGRectContainsPoint(CGRectInset(segment.frame, -1.0f, -1.0f), point))
+            if (CGRectContainsPoint(segment.frame, point)) {
+                self.selectedSegmentIndex = index;
                 break;
+            }
             ++index;
         }
-        NSAssert(index < [segments count], @"IKSegmentedControl must have IKSegment for each point inside it");
-        self.selectedSegmentIndex = index;
         return YES;
     }
     else {
