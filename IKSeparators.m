@@ -6,6 +6,7 @@
 @implementation IKSeparators
 @synthesize segmentedControl;
 @synthesize separator;
+@synthesize separateSelectedItem;
 
 - (void)setSeparator:(id)newSeparator {
     [newSeparator retain];
@@ -16,7 +17,7 @@
 
 
 - (id)initWithSegmentedControl:(IKSegmentedControl *)aSegmentedControl {
-    if (self = [super initWithFrame:aSegmentedControl.bounds]) {
+    if ((self = [super initWithFrame:aSegmentedControl.bounds])) {
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
         self.userInteractionEnabled = NO;
@@ -38,20 +39,20 @@
     CGContextRef context = UIGraphicsGetCurrentContext();
     
     for (int i=1, end=[segmentedControl.segments count]-1; i<end; ++i) {
-        if (i == segmentedControl.selectedSegmentIndex) {
+        if (i == segmentedControl.selectedSegmentIndex && !separateSelectedItem) {
             continue;
         }
         CGRect segmentFrame = [[segmentedControl.segments objectAtIndex:i] frame];
         if ([separator isKindOfClass:[UIColor class]]) {
             [separator setStroke];
             CGContextSetLineWidth(context, 1.0f);
-            if (i != segmentedControl.selectedSegmentIndex + 1) {
+            if (i != segmentedControl.selectedSegmentIndex + 1 || separateSelectedItem) {
                 CGContextBeginPath(context);
                 CGContextMoveToPoint(context, CGRectGetMinX(segmentFrame), CGRectGetMinY(segmentFrame));
                 CGContextAddLineToPoint(context, CGRectGetMinX(segmentFrame), CGRectGetMaxY(segmentFrame));
                 CGContextStrokePath(context);
             }
-            if (i != segmentedControl.selectedSegmentIndex - 1) {
+            if (i != segmentedControl.selectedSegmentIndex - 1 || separateSelectedItem) {
                 CGContextBeginPath(context);
                 CGContextMoveToPoint(context, CGRectGetMaxX(segmentFrame), CGRectGetMinY(segmentFrame));
                 CGContextAddLineToPoint(context, CGRectGetMaxX(segmentFrame), CGRectGetMaxY(segmentFrame));
@@ -59,12 +60,12 @@
             }
         }
         else {
-            if (i != segmentedControl.selectedSegmentIndex + 1) {
+            if (i != segmentedControl.selectedSegmentIndex + 1 || separateSelectedItem) {
                 CGRect rect = CGRectMake(CGRectGetMinX(segmentFrame) - [separator size].width/2, CGRectGetMinY(segmentFrame), 
                                          [separator size].width, CGRectGetHeight(segmentFrame));
                 [separator drawInRect:rect];
             }
-            if (i != segmentedControl.selectedSegmentIndex - 1) {
+            if (i != segmentedControl.selectedSegmentIndex - 1 || separateSelectedItem) {
                 CGRect rect = CGRectMake(CGRectGetMaxX(segmentFrame) - [separator size].width/2, CGRectGetMinY(segmentFrame),
                                          [separator size].width, CGRectGetHeight(segmentFrame));
                 [separator drawInRect:rect];

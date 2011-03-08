@@ -10,6 +10,7 @@
  @discussion UIColor and UIImage are supported.
  */
 @property (nonatomic, retain) id separator;
+@property (nonatomic) BOOL separateSelectedItem; // default NO
 
 - (id)initWithSegmentedControl:(IKSegmentedControl *)aSegmentedControl;
 

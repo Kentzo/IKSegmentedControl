@@ -5,6 +5,7 @@
 //  Created by Ilya Kulakov on 4.10.10.
 //  Copyright 2010. All rights reserved.
 
+#import <QuartzCore/QuartzCore.h>
 #import "IKSegmentedControl.h"
 #import "IKSegment.h"
 #import "IKSeparators.h"
@@ -73,7 +74,7 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
 - (id)initWithItems:(NSArray *)items {
     NSParameterAssert([items count] > 1);
     
-    if (self = [super initWithFrame:CGRectZero]) {
+    if ((self = [super initWithFrame:CGRectZero])) {
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
         self.clipsToBounds = YES;
@@ -238,7 +239,6 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
     return _backgrounds[_SelectedState];
 }
 
-
 - (void)_updateSegments {
     NSUInteger index = 0;
     for (IKSegment *segment in segments) {
@@ -252,5 +252,12 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
     }
 }
 
+- (void)setSeparateSelectedItem:(BOOL)aSeparateSelectedItem {
+    _separators.separateSelectedItem = aSeparateSelectedItem;
+}
+
+- (BOOL)separateSelectedItem {
+    return _separators.separateSelectedItem;
+}
 
 @end

@@ -38,5 +38,4 @@
 - (void)setBackgroundForNormalState:(id)normalBackground forSelectedState:(id)selectedBackground;
 - (id)normalStateBackground;
 - (id)selectedStateBackground;
-
 @end
