@@ -19,7 +19,11 @@
     [contentView removeFromSuperview];
     [self addSubview:newContentView];
     contentView = newContentView;
-    [contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+    if ([newContentView isKindOfClass:[UIImageView class]]) {
+        [contentView setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin];
+    } else {
+        [contentView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+    }
     [contentView setBackgroundColor:[UIColor clearColor]];
     [contentView setOpaque:NO];
 }

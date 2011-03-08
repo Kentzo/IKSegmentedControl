@@ -96,9 +96,10 @@ static void SetSegmentBackground(IKSegment *segment, id background) {
                 [label release];
             }
             else if ([item isKindOfClass:[UIImage class]]) {
-                // TODO: add support for images
-                [self dealloc];
-                return nil;                
+                UIImageView *imageView = [[UIImageView alloc] initWithImage:item];
+                segment = [[IKSegment alloc] initWithFrame:imageView.frame];
+                segment.contentView = imageView;
+                [imageView release];
             }
             else {
                 NSAssert(NO, @"You can use only NSString, UIImage or UIView instances as items, but you use %@", NSStringFromClass([item class]));
