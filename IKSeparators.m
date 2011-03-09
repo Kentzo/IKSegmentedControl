@@ -37,7 +37,7 @@
 
 - (void)drawRect:(CGRect)rect {
     CGContextRef context = UIGraphicsGetCurrentContext();
-    
+    CGContextSetShouldAntialias(context, FALSE);
     for (int i=1, end=[segmentedControl.segments count]-1; i<end; ++i) {
         if (i == segmentedControl.selectedSegmentIndex && !separateSelectedItem) {
             continue;
